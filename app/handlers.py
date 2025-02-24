@@ -26,18 +26,23 @@ async def register_cmd(message: Message):
 @router.message()
 async def check_plate_mentions(message: types.Message):
     words = message.text.upper().split()
-    for word in words:
-        user_id = get_user_by_plate(word)
-#if user_id and user_id != message.from_user.id:
-        try:
-            await message.bot.send_message(
-                user_id,
-                f"🚗 Your plate **{word}** was mentioned in **{message.chat.title}**.\n"
-                f"[Jump to message](https://t.me/{message.chat.username}/{message.message_id})",
-                parse_mode="Markdown",
-                disable_web_page_preview=True
-            )
-        except Exception as e:
-            print(f"Error sending DM: {e}")  # Log errors if user hasn't started the bot
-
-
+    checked_plates = set()
+    for i in range(len(words)):
+        for j in range(i+1, min(i+4, len(words)+1)):
+            plate_candidate = ''.join(words[i:j])
+            plate_candidate = normalize_plate(plate_candidate)
+            if plate_candidate in checked_plates:
+                continue
+            checked_plates.add(plate_candidate)
+            user_id = get_user_by_plate(plate_candidate)
+            if user_id:
+                try:
+                    await message.bot.send_message(
+                        user_id,
+                        f"🚗 Your plate **{plate_candidate}** was mentioned in **{message.chat.title}**.\n"
+                        f"[Jump to message](https://t.me/{message.chat.username}/{message.message_id})",
+                        parse_mode="Markdown",
+                        disable_web_page_preview=True
+                    )
+                except Exception as e:
+                    print(f"Failed to send message to user {user_id}: {e}")
