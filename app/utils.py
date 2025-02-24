@@ -1,5 +1,9 @@
-from database import SessionLocal
-from models import Plate
+from app.database.database import SessionLocal
+from app.database.models import Plate
+import re
+
+def normalize_plate(plate):
+    return re.sub(r"[^A-Z0-9]", "", plate.upper())
 
 def register_plate(user_id: int, plate_number: str):
     session = SessionLocal()
