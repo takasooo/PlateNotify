@@ -18,6 +18,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        print(os.getenv("DB_URL"))
         asyncio.run(main())
     except KeyboardInterrupt:
         print ('Goodbye!')
