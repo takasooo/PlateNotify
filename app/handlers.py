@@ -28,6 +28,11 @@ async def register_cmd(message: Message):
 
     raw_plate_number = parts[1]
     plate_number = normalize_plate(raw_plate_number)
+
+    if not plate_number:
+        await message.answer("Invalid plate format! Use format: ABC1, XYZ12, DEF123.")
+        return
+
     if register_plate(message.from_user.id, plate_number):
         await message.answer(f"Plate {plate_number} registered!")
     else:
@@ -44,6 +49,7 @@ async def check_plate_mentions(message: types.Message):
             plate_candidate = normalize_plate(plate_candidate)
             if plate_candidate in checked_plates:
                 continue
+            
             checked_plates.add(plate_candidate)
             user_id = get_user_by_plate(plate_candidate)
 

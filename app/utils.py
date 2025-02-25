@@ -3,7 +3,10 @@ from app.database.models import Plate, User, joinedload
 import re
 
 def normalize_plate(plate):
-    return re.sub(r"[^A-Z0-9]", "", plate.upper())
+    plate = re.sub(r"[^A-Z0-9]", "", plate.upper())
+    if re.match(r"^[A-Z]{3}\d{1,3}$", plate):  # Validate format (3 letters + 1-3 digits)
+        return plate
+    return None  # Return None if invalid
 
 def register_plate(user_telegram_id: int, plate_number: str):
     session = SessionLocal()
@@ -28,9 +31,6 @@ def register_plate(user_telegram_id: int, plate_number: str):
 
 def get_user_by_plate(plate_number):
     with SessionLocal() as session:
-        plate = session.query(Plate).filter_by(plate_number=plate_number).first()
-        if plate:
-            session.add(plate)
-            return plate.owner.telegram_id
-        return None
+        plate = session.query(Plate).join(User).filter(Plate.plate_number == plate_number).first()
+        return plate.owner.telegram_id if plate else None
 
