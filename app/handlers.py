@@ -8,7 +8,7 @@ from app.database.database import SessionLocal
 from datetime import datetime
 from app.database.models import Plate
 
-
+ALLOWED_CHAT_ID = -1002299061042
 router = Router()
 
 @router.message(Command("start"))
@@ -40,6 +40,9 @@ async def register_cmd(message: Message):
 
 @router.message()
 async def check_plate_mentions(message: types.Message):
+    if message.chat.id != ALLOWED_CHAT_ID:
+        return
+
     words = message.text.upper().split()
     checked_plates = set()
 
@@ -75,3 +78,7 @@ async def check_plate_mentions(message: types.Message):
 
                 except Exception as e:
                     print(f"Failed to send message to user {user_id}: {e}")
+
+@router.message(Command("get_chat_id"))
+async def get_chat_id(message: Message):
+    await message.answer(f"Chat ID: {message.chat.id}")
